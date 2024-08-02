@@ -1,14 +1,24 @@
-const express = require('express');
-const path = require('path');
+const express = require("express");
+const path = require("path");
 
 const app = express();
 const port = 3000;
 
-// Указываем путь к папке с статическими файлами
-app.use(express.static(path.join(__dirname, 'public')));
+//To tell express to use EJS as the default view engine
+app.set("view engine", "ejs");
 
-app.get('/', (req, res) => {
-  res.send('Hello World default!');
+// Указываем путь к папке с статическими файлами
+app.use(express.static(path.join(__dirname, "public")));
+
+app.get("/", (req, res) => {
+  // const data = {
+  //   username: "Intensio Tempest",
+  // };
+
+  // res.render(path.join(__dirname, "public", "pages", "index.ejs"), data);
+
+  res.render(path.join(__dirname, "public", "pages", "islands.ejs"));
+  // res.send("Hello World default!");
 });
 
 app.listen(port, () => {
