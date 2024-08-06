@@ -1,6 +1,8 @@
 {
   "dependencies": {
     "@wasmer/wasi": "^1.2.2",
+    "animejs": "^3.2.2",
+    "curtainsjs": "^8.1.6",
     "ejs": "^3.1.10",
     "express": "^4.19.2",
     "wasm-loader": "^1.3.0"
