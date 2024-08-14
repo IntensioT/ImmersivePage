@@ -11,57 +11,24 @@ app.set("view engine", "ejs");
 app.use(express.static(path.join(__dirname, "public")));
 
 app.get("/", (req, res) => {
-  // const data = {
-  //   username: "Intensio Tempest",
-  // };
+  const template = req.query.template || 'islands';
+  console.log(`Template parameter: ${template}`);
 
-  // res.render(path.join(__dirname, "public", "pages", "index.ejs"), data);
-
-  res.render(path.join(__dirname, "public", "pages", "islands.ejs"));
+  if (template === 'index') {
+    const data = {
+      username: "Intensio Tempest",
+    };
+    res.render(path.join(__dirname, "public", "pages", "index.ejs"), data);
+  } else if (template === 'tasks') {
+    // res.render("tasks", );
+  } else if (template === 'islands') {
+    res.render(path.join(__dirname, "public", "pages", "islands.ejs"));
+  } else {
+    res.status(400).send('Invalid template parameter');
+  }
   // res.send("Hello World default!");
 });
 
 app.listen(port, () => {
   console.log(`Server running at http://127.0.0.1:${port}/`);
 });
-
-///////////////////////////////////////////////////////////////////
-// Assume add.wasm file exists that contains a single function adding 2 provided arguments
-// const fs = require('node:fs');
-
-// const wasmBuffer = fs.readFileSync('./public/test.wasm');
-// WebAssembly.instantiate(wasmBuffer).then(wasmModule => {
-//   // Exported function live under instance.exports
-//   const { add } = wasmModule.instance.exports;
-//   const sum = add(5, 6);
-//   console.log(sum); // Outputs: 11
-// });
-
-///////////////////////////////////////////////////////////////////
-
-// const fs = require('fs');
-// var source = fs.readFileSync('./public/test.wasm');
-
-// var typedArray = new Uint8Array(source);
-
-// const env = {
-//   memoryBase: 0,
-//   tableBase: 0,
-//   memory: new WebAssembly.Memory({
-//     initial: 256
-//   }),
-//   table: new WebAssembly.Table({
-//     initial: 0,
-//     element: 'anyfunc'
-//   })
-// }
-
-// WebAssembly.instantiate(typedArray, {
-// env: env
-// }).then(result => {
-// console.log(util.inspect(result, true, 0));
-// console.log(result.instance.exports._add(9, 9));
-// }).catch(e => {
-// // error caught
-// console.log(e);
-// });
