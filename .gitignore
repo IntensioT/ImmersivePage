@@ -142,3 +142,7 @@ dist
 
 # Built Visual Studio Code Extensions
 *.vsix
+
+#Config dev mode
+Backend/LoginBackend/config/dev.js
+dev.js
