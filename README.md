@@ -8,3 +8,6 @@ Some notes what i have done yet:
 - Unity is able to send web requests on server and able to get and read information from server
 - argon2 is used to hash passwords
 - all passwords are transfered in post requests 
+- correct deserialization on unity client
+- limitting response data
+- regex password check
