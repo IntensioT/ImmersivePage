@@ -4,13 +4,14 @@
   "description": "Backend for unity web",
   "main": "index.js",
   "scripts": {
-    "dev" : "npx nodemon server.js",
-    "production" : "node server.js",
+    "dev": "npx nodemon server.js",
+    "production": "node server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Intensio",
   "license": "ISC",
   "dependencies": {
+    "argon2": "^0.40.3",
     "express": "^4.19.2"
   }
 }
