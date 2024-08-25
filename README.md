@@ -11,3 +11,6 @@ Some notes what i have done yet:
 - correct deserialization on unity client
 - limitting response data
 - regex password check
+- compression library for unity .gz
+- CORS fix 
+

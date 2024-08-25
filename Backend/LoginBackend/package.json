@@ -2,7 +2,7 @@
   "name": "loginbackend",
   "version": "1.0.0",
   "description": "Backend for unity web",
-  "main": "index.js",
+  "main": "server.js",
   "scripts": {
     "dev": "npx nodemon server.js",
     "production": "node server.js",
@@ -12,6 +12,7 @@
   "license": "ISC",
   "dependencies": {
     "argon2": "^0.40.3",
+    "cors": "^2.8.5",
     "express": "^4.19.2"
   }
 }

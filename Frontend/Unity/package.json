@@ -1,0 +1,16 @@
+{
+  "name": "unityclient",
+  "version": "1.0.0",
+  "description": "Client on unity web",
+  "main": "unityClientServer.js",
+  "scripts": {
+    "production": "node unityClientServer.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Intensio",
+  "license": "ISC",
+  "dependencies": {
+    "compression": "^1.7.4",
+    "express": "^4.19.2"
+  }
+}
