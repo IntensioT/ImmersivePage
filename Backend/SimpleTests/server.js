@@ -49,7 +49,7 @@ app.post('/filter-tasks', (req, res) => {
 /////////////////////////////////////////////////////////////////
 app.get("/", (req, res) => {
   const template = req.query.template || 'tasks';
-  console.log(`Template parameter: ${template}`);
+  console.log(`Template parameter: ${template}`); 
 
   if (template === 'index') {
     const data = {
