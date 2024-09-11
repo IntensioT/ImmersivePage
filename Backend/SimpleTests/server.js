@@ -45,6 +45,14 @@ app.post('/filter-tasks', (req, res) => {
   res.render((path.join(__dirname, "public", "pages", "tasks.ejs")), { tasks: filteredTasks });
 });
 
+app.post('/update-task', (req, res) => {
+  const { index, title, status, dueDate } = req.body;
+  if (index >= 0 && index < tasks.length) {
+    tasks[index] = { title, status, dueDate, file: tasks[index].file };
+  }
+  res.redirect('/');
+});
+
 
 /////////////////////////////////////////////////////////////////
 app.get("/", (req, res) => {
