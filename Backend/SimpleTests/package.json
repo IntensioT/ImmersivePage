@@ -1,6 +1,7 @@
 {
   "scripts": {
     "dev": "npx nodemon server.js",
+    "production": "node server.js",
     "start": "node server.js"
   },
   "dependencies": {

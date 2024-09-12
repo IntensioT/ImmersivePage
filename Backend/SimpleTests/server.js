@@ -3,8 +3,10 @@ const path = require("path");
 const bodyParser = require('body-parser');
 const multer = require('multer');
 
+const keys = require("./config/keys.js");
+const mongoose = require('mongoose');
+
 const app = express();
-const port = 3000;
 
 //To tell express to use EJS as the default view engine
 app.set("view engine", "ejs");
@@ -27,23 +29,57 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
-// Массив задач
-let tasks = [];
+// Setting DB up
+mongoose.connect(keys.mongoURI);
+
+// Model config
+const taskSchema = new mongoose.Schema({
+  title: String,
+  status: String,
+  dueDate: Date,
+  file: String
+});
+const Task = mongoose.model('tasks', taskSchema);
+
+// // Массив задач
+// let tasks = [];
 
 // Маршруты
 
-app.post('/add-task', upload.single('file'), (req, res) => {
+app.post('/add-task', upload.single('file'), async (req, res) => {
   const { title, status, dueDate } = req.body;
   const file = req.file ? req.file.filename : null;
-  tasks.push({ title, status, dueDate, file });
+  const newTask = new Task({ title, status, dueDate, file });
+  await newTask.save();
+  // tasks.push({ title, status, dueDate, file });
   res.redirect('/');
 });
 
-app.post('/filter-tasks', (req, res) => {
-  const { status } = req.body;
-  const filteredTasks = status ? tasks.filter(task => task.status === status) : tasks;
-  res.render((path.join(__dirname, "public", "pages", "tasks.ejs")), { tasks: filteredTasks });
+app.post('/filter-tasks', async (req, res) => {
+  const { status, overdue } = req.body;
+  let filter = {};
+
+  if (status) {
+    filter.status = status;
+  }
+
+  if (overdue === 'overdue') {
+    filter.dueDate = { $lt: new Date() };
+  } else if (overdue === 'upcoming') {
+    filter.dueDate = { $gte: new Date() };
+  }
+
+  const tasks = await Task.find(filter).sort({ dueDate: 1 });
+  res.render(path.join(__dirname, "public", "pages", "tasks.ejs"), { tasks });
 });
+
+app.post('/update-task', async (req, res) => {
+  const { index, title, status, dueDate } = req.body;
+  await Task.findByIdAndUpdate(index, { title, status, dueDate });
+  res.redirect('/');
+});
+
+
 
 app.post('/update-task', (req, res) => {
   const { index, title, status, dueDate } = req.body;
@@ -55,7 +91,7 @@ app.post('/update-task', (req, res) => {
 
 
 /////////////////////////////////////////////////////////////////
-app.get("/", (req, res) => {
+app.get("/", async (req, res) => {
   const template = req.query.template || 'tasks';
   console.log(`Template parameter: ${template}`); 
 
@@ -65,6 +101,7 @@ app.get("/", (req, res) => {
     };
     res.render(path.join(__dirname, "public", "pages", "index.ejs"), data);
   } else if (template === 'tasks') {
+    const tasks = await Task.find();
     res.render((path.join(__dirname, "public", "pages", "tasks.ejs")), { tasks: tasks });
   } else if (template === 'slider') {
     res.render(path.join(__dirname, "public", "pages", "slider.ejs"));
@@ -76,6 +113,6 @@ app.get("/", (req, res) => {
 
 
 
-app.listen(port, () => {
-  console.log(`Server running at http://127.0.0.1:${port}/`);
+app.listen(keys.port, () => {
+  console.log(`Server running at http://127.0.0.1:${keys.port}/`);
 });

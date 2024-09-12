@@ -42,16 +42,14 @@
     <h3>Tasks: </h3>
     <ul>
       <% tasks.forEach((task, index)=> { %>
-        <li>
+        <li class="<%= new Date(task.dueDate) < new Date() ? 'overdue' : 'upcoming' %>">
           <strong>
             <%= task.title %>
-          </strong> - <%= task.status %> - <%= task.dueDate %>
-              <% if (task.files && task.files.length> 0) { %>
-                <% task.files.forEach(file=> { %>
-                  <a href="/uploads/<%= file %>">Download File</a>
-                  <% }) %>
-                    <% } %>
-                      <button onclick="showEditForm('<%= index %>')">Edit</button>
+          </strong> - <%= task.status %> - <%= task.dueDate.toISOString().split('T')[0] %>
+              <% if (task.file) { %>
+                <a href="/uploads/<%= task.file %>">Download File</a>
+                <% } %>
+                  <button onclick="showEditForm('<%= task._id %>')">Edit</button>
         </li>
         <% }) %>
     </ul>
@@ -72,11 +70,11 @@
   <script>
     function showEditForm(index) {
       const tasks = JSON.parse('<%- JSON.stringify(tasks) %>');
-      const task = tasks[index];
+      const task = tasks.find(t => t._id === index);
       document.getElementById('edit-index').value = index;
       document.getElementById('edit-title').value = task.title;
       document.getElementById('edit-status').value = task.status;
-      document.getElementById('edit-dueDate').value = task.dueDate;
+      document.getElementById('edit-dueDate').value = task.dueDate.toISOString().split('T')[0];
       document.getElementById('edit-form').style.display = 'block';
     }
   </script>

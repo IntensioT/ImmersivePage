@@ -21,7 +21,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 const mongoose = require("mongoose");
 mongoose.connect(keys.mongoURI);
 
-//Set up DB model
+//Set up DB model 
 require("./models/account.js");
 
 //Set up the routes
