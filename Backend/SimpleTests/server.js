@@ -73,20 +73,23 @@ app.post('/filter-tasks', async (req, res) => {
   res.render(path.join(__dirname, "public", "pages", "tasks.ejs"), { tasks });
 });
 
+// app.post('/update-task', async (req, res) => {
+//   const { index, title, status, dueDate } = req.body;
+//   console.log('Update task called with:', req.body);
+//   await Task.findByIdAndUpdate(index, { title, status, dueDate });
+//   res.redirect('/');
+// });
+
 app.post('/update-task', async (req, res) => {
   const { index, title, status, dueDate } = req.body;
-  await Task.findByIdAndUpdate(index, { title, status, dueDate });
-  res.redirect('/');
-});
-
-
-
-app.post('/update-task', (req, res) => {
-  const { index, title, status, dueDate } = req.body;
-  if (index >= 0 && index < tasks.length) {
-    tasks[index] = { title, status, dueDate, file: tasks[index].file };
+  console.log('Update task called with:', req.body);
+  try {
+    await Task.findByIdAndUpdate(index, { title, status, dueDate });
+    res.redirect('/');
+  } catch (error) {
+    console.error('Error updating task:', error);
+    res.status(500).send('Error updating task');
   }
-  res.redirect('/');
 });
 
 

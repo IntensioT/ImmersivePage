@@ -49,13 +49,16 @@
               <% if (task.file) { %>
                 <a href="/uploads/<%= task.file %>">Download File</a>
                 <% } %>
-                  <button onclick="showEditForm('<%= task._id %>')">Edit</button>
+                  <button class="edit-button" data-index="<%= task._id %>" data-title="<%= task.title %>"
+                    data-status="<%= task.status %>"
+                    data-due-date="<%= task.dueDate.toISOString().split('T')[0] %>">Edit</button>
         </li>
         <% }) %>
     </ul>
   </form>
 
-  <form action="/update-task" method="POST">
+
+  <form id="edit-form" action="/update-task" method="POST" style="display:block;">
     <input type="hidden" name="index" id="edit-index">
     <input type="text" name="title" id="edit-title" placeholder="Task Title" required>
     <select name="status" id="edit-status">
@@ -67,15 +70,50 @@
     <button type="submit">Update Task</button>
   </form>
 
+
+
   <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      document.querySelectorAll('.edit-button').forEach(button => {
+        button.addEventListener('click', function (event) {
+          event.preventDefault(); // Предотвращаем отправку формы по умолчанию
+          const index = this.getAttribute('data-index');
+          const title = this.getAttribute('data-title');
+          const status = this.getAttribute('data-status');
+          const dueDate = this.getAttribute('data-due-date');
+
+          console.log('Edit button clicked:', { index, title, status, dueDate });
+
+          document.getElementById('edit-index').value = index;
+          document.getElementById('edit-title').value = title;
+          document.getElementById('edit-status').value = status;
+          document.getElementById('edit-dueDate').value = dueDate;
+        });
+      });
+    });
+  </script>
+
+  <script>
+    const tasks = ('<%- JSON.stringify(tasks) %>');
+    console.log('Tasks:', tasks);
+
+
     function showEditForm(index) {
-      const tasks = JSON.parse('<%- JSON.stringify(tasks) %>');
+
+      console.log('showEditForm called with index:', index);
       const task = tasks.find(t => t._id === index);
-      document.getElementById('edit-index').value = index;
-      document.getElementById('edit-title').value = task.title;
-      document.getElementById('edit-status').value = task.status;
-      document.getElementById('edit-dueDate').value = task.dueDate.toISOString().split('T')[0];
-      document.getElementById('edit-form').style.display = 'block';
+      // const task = tasks.find(t => t.title === title);
+      // console.log("current task: " + task);
+      // if (task) {
+      //   document.getElementById('edit-index').value = task._id;
+      //   document.getElementById('edit-title').value = task.title;
+      //   document.getElementById('edit-status').value = task.status;
+      //   document.getElementById('edit-dueDate').value = task.dueDate.toISOString().split('T')[0];
+      //   document.getElementById('edit-form').style.display = 'block';
+      // }
+      // else {
+      // console.error('Task not found with index:', index);
+      // }
     }
   </script>
 
