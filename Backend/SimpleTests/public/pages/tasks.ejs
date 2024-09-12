@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Task Manager</title>
   <link rel="stylesheet" href="/styles/tasks.css">
 </head>
+
 <body>
   <h1>Task Manager</h1>
 
@@ -13,6 +15,7 @@
     <input type="text" name="title" placeholder="Task Title" required>
     <select name="status">
       <option value="pending">Pending</option>
+      <option value="in-progress">In Progress</option>
       <option value="completed">Completed</option>
     </select>
     <input type="date" name="dueDate" required>
@@ -24,40 +27,52 @@
     <select name="status">
       <option value="">All</option>
       <option value="pending">Pending</option>
+      <option value="in-progress">In Progress</option>
       <option value="completed">Completed</option>
+    </select>
+    <select name="overdue">
+      <option value="">All</option>
+      <option value="overdue">Overdue</option>
+      <option value="upcoming">Upcoming</option>
     </select>
     <button type="submit">Filter</button>
   </form>
 
-  <ul>
-    <% tasks.forEach((task, index) => { %>
-      <li>
-        <strong><%= task.title %></strong> - <%= task.status %> - <%= task.dueDate %>
-        <% if (task.file) { %>
-          <a href="/uploads/<%= task.file %>">Download File</a>
-        <% } %>
-        <button onclick="showEditForm(<%= index %>)">Edit</button>
-      </li>
-    <% }) %>
-  </ul>
+  <form>
+    <h3>Tasks: </h3>
+    <ul>
+      <% tasks.forEach((task, index)=> { %>
+        <li>
+          <strong>
+            <%= task.title %>
+          </strong> - <%= task.status %> - <%= task.dueDate %>
+              <% if (task.files && task.files.length> 0) { %>
+                <% task.files.forEach(file=> { %>
+                  <a href="/uploads/<%= file %>">Download File</a>
+                  <% }) %>
+                    <% } %>
+                      <button onclick="showEditForm('<%= index %>')">Edit</button>
+        </li>
+        <% }) %>
+    </ul>
+  </form>
 
-  <div id="edit-form" style="display: none;"></div>
-    <form action="/update-task" method="POST">
-      <input type="hidden" name="index" id="edit-index">
-      <input type="text" name="title" id="edit-title" placeholder="Task Title" required>
-      <select name="status" id="edit-status">
-        <option value="pending">Pending</option>
-        <option value="completed">Completed</option>
-      </select>
-      <input type="date" name="dueDate" id="edit-dueDate" required>
-      <button type="submit">Update Task</button>
-    </form>
-  </div>
-
+  <form action="/update-task" method="POST">
+    <input type="hidden" name="index" id="edit-index">
+    <input type="text" name="title" id="edit-title" placeholder="Task Title" required>
+    <select name="status" id="edit-status">
+      <option value="pending">Pending</option>
+      <option value="in-progress">In Progress</option>
+      <option value="completed">Completed</option>
+    </select>
+    <input type="date" name="dueDate" id="edit-dueDate" required>
+    <button type="submit">Update Task</button>
+  </form>
 
   <script>
     function showEditForm(index) {
-      const task = <%- JSON.stringify(tasks) %>[index];
+      const tasks = JSON.parse('<%- JSON.stringify(tasks) %>');
+      const task = tasks[index];
       document.getElementById('edit-index').value = index;
       document.getElementById('edit-title').value = task.title;
       document.getElementById('edit-status').value = task.status;
@@ -67,4 +82,5 @@
   </script>
 
 </body>
+
 </html>
