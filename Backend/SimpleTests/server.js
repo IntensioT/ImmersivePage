@@ -73,13 +73,6 @@ app.post('/filter-tasks', async (req, res) => {
   res.render(path.join(__dirname, "public", "pages", "tasks.ejs"), { tasks });
 });
 
-// app.post('/update-task', async (req, res) => {
-//   const { index, title, status, dueDate } = req.body;
-//   console.log('Update task called with:', req.body);
-//   await Task.findByIdAndUpdate(index, { title, status, dueDate });
-//   res.redirect('/');
-// });
-
 app.post('/update-task', async (req, res) => {
   const { index, title, status, dueDate } = req.body;
   console.log('Update task called with:', req.body);
