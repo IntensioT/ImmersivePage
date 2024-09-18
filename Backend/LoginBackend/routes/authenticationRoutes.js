@@ -2,6 +2,9 @@ const mongoose = require("mongoose");
 const Account = mongoose.model("accounts");
 const argon2 = require("argon2");
 
+const jwt = require('jsonwebtoken');
+const keys = require('../config/keys')
+
 const passwordRegEx = new RegExp("(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.{5,})");
 
 module.exports = (app) => {
@@ -23,8 +26,9 @@ module.exports = (app) => {
   app.post("/account/login", async (req, res) => {
     const { reqUsername, reqPassword } = req.body;
 
-    // if (reqUsername == null || reqPassword == null) {
-    if (reqUsername == null || !passwordRegEx.test(reqPassword)) {
+    if (reqUsername == null 
+      // || !passwordRegEx.test(reqPassword)
+    ) {
       return res
         .status(400)
         .json({ message: "Username and password are required" });
@@ -44,11 +48,17 @@ module.exports = (app) => {
         userAccount.lastAuthentication = Date.now();
         await userAccount.save();
 
+        const token = jwt.sign({ username: userAccount.username, adminFlag: userAccount.adminFlag }, keys.jwtSecret, { expiresIn: '1h' });
+        // res.cookie('token', token);
+        res.setHeader('Authorization',token);
+        console.log("Token set: " + token);
+
         // Create a new object with only the desired fields
         const responseUserAccount = {
           username: userAccount.username,
           adminFlag: userAccount.adminFlag,
         };
+        
         return res.status(200).json({data: responseUserAccount});
       } else {
         // password did not match
@@ -68,12 +78,12 @@ module.exports = (app) => {
         .status(400)
         .json({ message: "Username and password are required" });
     }
-    if (!passwordRegEx.test(reqPassword))
-    {
-      return res
-        .status(422)
-        .json({ message: "Unsafe password for registration" });
-    }
+    // if (!passwordRegEx.test(reqPassword))
+    // {
+    //   return res
+    //     .status(422)
+    //     .json({ message: "Unsafe password for registration" });
+    // }
 
     var userAccount = await Account.findOne(
       { username: reqUsername },

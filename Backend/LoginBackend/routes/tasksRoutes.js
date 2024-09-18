@@ -5,10 +5,18 @@ const cors = require("cors");
 
 const multer = require("multer");
 const path = require("path");
+const fs = require("fs");
+
+const authMiddleware = require('../middlewares/authMiddleware');
+
+const uploadDir = path.join(__dirname, "public", "uploads");
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, "/public/uploads/");
+    cb(null, uploadDir);
   },
   filename: function (req, file, cb) {
     cb(null, Date.now() + path.extname(file.originalname));
@@ -36,9 +44,10 @@ module.exports = (app) => {
   app.post("/tasks/add-task", upload.single("file"), async (req, res) => {
     try {
       console.log(req.body);
-      const { title, status, dueDate, file } = req.body;
+      const { title, status, dueDate, filePath } = req.body;
+      const file = req.file ? req.file.filename : null; 
 
-      const newTask = new Task({ title, status, dueDate, file });
+      const newTask = new Task({ title, status, dueDate, file, filePath });
       await newTask.save();
       res
         .status(201)
@@ -98,13 +107,27 @@ module.exports = (app) => {
     }
   });
 
-  app.get("/tasks", async (req, res) => {
+  app.get("/tasks", authMiddleware, async (req, res) => {
     try {
       const tasks = await Task.find();
       res.status(200).json({ tasks });
     } catch (error) {
       console.error("Error fetching tasks:", error);
       res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  app.get("/tasks/download/:filename", (req, res) => {
+    const filePath = path.join(__dirname, "public", "uploads", req.params.filename);
+    if (fs.existsSync(filePath)) {
+      res.download(filePath, (err) => {
+        if (err) {
+          console.error("Error downloading file:", err);
+          res.status(500).send("Error downloading file");
+        }
+      });
+    } else {
+      res.status(404).send("File not found");
     }
   });
 };

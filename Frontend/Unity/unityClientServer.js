@@ -3,6 +3,16 @@ const express = require('express');
 const path = require('path');
 const app = express();
 const compression = require('compression');
+const cors = require("cors");
+
+
+const corsOptions = {
+  methods: "GET,POST", 
+  allowedHeaders: "*",
+  exposedHeaders: ['set-cookie'] 
+};
+
+app.use(cors());
 
 // Включение сжатия unity требует
 app.use(compression());
@@ -23,6 +33,8 @@ app.use(express.static(path.join(__dirname, 'public'), {
     }
   }));
   
+// Сервирование статических файлов из папки public/StreamingAssets
+app.use('/StreamingAssets', express.static(path.join(__dirname, 'public', 'StreamingAssets')));
 
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
