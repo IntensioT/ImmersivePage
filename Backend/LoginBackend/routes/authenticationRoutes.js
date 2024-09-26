@@ -48,7 +48,7 @@ module.exports = (app) => {
         userAccount.lastAuthentication = Date.now();
         await userAccount.save();
 
-        const token = jwt.sign({ username: userAccount.username, adminFlag: userAccount.adminFlag }, keys.jwtSecret, { expiresIn: '1h' });
+        const token = jwt.sign({ username: userAccount.username, adminFlag: userAccount.adminFlag }, keys.jwtSecret, { expiresIn: 60 * 2 });
         // res.cookie('token', token);
         res.setHeader('Authorization',token);
         console.log("Token set: " + token);

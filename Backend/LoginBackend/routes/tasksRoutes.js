@@ -32,7 +32,6 @@ module.exports = (app) => {
   const upload = multer({ storage: storage });
 
   app.use(express.json());
-  app.use(cors());
 
   app.post("/tasks/upload", upload.single("file"), (req, res) => {
     if (!req.file) {

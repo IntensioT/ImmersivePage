@@ -8,7 +8,7 @@ const app = express();
 
 const corsOptions = {
   exposedHeaders: "Authorization",
-  allowedHeaders: 'Authorization',
+  allowedHeaders: ['Authorization', 'Content-Type'],
   origin: 'http://127.0.0.1:5052', // Укажите домен вашего клиента
   credentials: true
 };
