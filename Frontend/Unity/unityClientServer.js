@@ -9,10 +9,10 @@ const cors = require("cors");
 const corsOptions = {
   methods: "GET,POST", 
   allowedHeaders: "*",
-  exposedHeaders: ['set-cookie'] 
+  exposedHeaders: ['set-cookie', 'Authorization', 'Refresh-Token'] 
 };
 
-app.use(cors());
+// app.use(cors(corsOptions));
 
 // Включение сжатия unity требует
 app.use(compression());
