@@ -7,9 +7,10 @@ const cookieParser = require("cookie-parser");
 const app = express();
 
 const corsOptions = {
-  exposedHeaders: "Authorization",
-  allowedHeaders: ['Authorization', 'Content-Type'],
-  origin: 'http://127.0.0.1:5052', // Укажите домен вашего клиента
+  exposedHeaders: 'Authorization, Refresh-Token',
+  allowedHeaders: ['Authorization', 'Refresh-Token','Content-Type', 'Access-Control-Allow-Headers', 'Content-Type'],
+  methods: 'GET,POST,PUT,DELETE,OPTIONS',
+  origin: 'http://127.0.0.1:5052',
   credentials: true
 };
 
@@ -19,7 +20,7 @@ app.use(cookieParser());
 
 // Some middleware that will parse string in request
 // body-parser
-app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.urlencoded({ extended: false }), bodyParser.json());
 
 // Setting DB up
 const mongoose = require("mongoose");

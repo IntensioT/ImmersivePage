@@ -52,7 +52,7 @@ module.exports = (app) => {
         const token = jwt.sign(
           { username: userAccount.username, adminFlag: userAccount.adminFlag },
           keys.jwtSecret,
-          { expiresIn: 60 * 2 }
+          { expiresIn:  2 }
         );
         const refreshToken = jwt.sign(
           { username: userAccount.username },
