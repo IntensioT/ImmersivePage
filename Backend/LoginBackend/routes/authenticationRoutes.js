@@ -52,7 +52,7 @@ module.exports = (app) => {
         const token = jwt.sign(
           { username: userAccount.username, adminFlag: userAccount.adminFlag },
           keys.jwtSecret,
-          { expiresIn:  2 }
+          { expiresIn: 60 * 3  }
         );
         const refreshToken = jwt.sign(
           { username: userAccount.username },
@@ -62,15 +62,27 @@ module.exports = (app) => {
         userAccount.refreshToken = refreshToken;
         await userAccount.save();
 
-        res.setHeader("Authorization", token);
-        res.setHeader("Refresh-Token", refreshToken);
-        console.log("Token set: " + token);
-        console.log("Server send refresh token to user: " + refreshToken);
+        // res.setHeader("Authorization", token);
+        // res.setHeader("Refresh-Token", refreshToken);
+        // console.log("Token set: " + token);
+        // console.log("Server send refresh token to user: " + refreshToken);
+
+        // // Create a new object with only the desired fields
+        // const responseUserAccount = {
+        //   username: userAccount.username,
+        //   adminFlag: userAccount.adminFlag,
+        // };
+
+        // Set cookies for browser
+        res.cookie("refreshToken", token, { httpOnly: true,  sameSite: 'None', secure: true });
+        // res.setHeader('Access-Control-Allow-Credentials', 'true');
 
         // Create a new object with only the desired fields
         const responseUserAccount = {
           username: userAccount.username,
           adminFlag: userAccount.adminFlag,
+          accessToken: token,
+          refreshToken: refreshToken,
         };
 
         return res.status(200).json({ data: responseUserAccount });
@@ -86,7 +98,7 @@ module.exports = (app) => {
 
   app.post("/account/refresh-token", async (req, res) => {
     const { refreshToken } = req.body;
-    console.log ("Server trying to refresh: " + refreshToken);
+    console.log("Server trying to refresh: " + refreshToken);
 
     if (!refreshToken) {
       return res
@@ -108,10 +120,12 @@ module.exports = (app) => {
       const token = jwt.sign(
         { username: userAccount.username, adminFlag: userAccount.adminFlag },
         keys.jwtSecret,
-        { expiresIn: 60 * 2 }
+        { expiresIn: 60 * 3 }
       );
       res.setHeader("Authorization", token);
+      res.cookie("refreshToken", token, { httpOnly: true,  sameSite: 'None', secure: true });
       console.log("Token refreshed: " + token);
+      
 
       return res.status(200).json({ message: "Token refreshed" });
     } catch (err) {

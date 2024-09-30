@@ -116,6 +116,21 @@ module.exports = (app) => {
     }
   });
 
+  app.delete("/tasks/delete-task", async (req, res) => {
+    try {
+        const { _id } = req.body;
+        const deletedTask = await Task.findByIdAndDelete(_id);
+        if (!deletedTask) {
+            return res.status(404).json({ message: "Task not found" });
+        }
+        res.status(200).json({ message: "Task deleted successfully", task: deletedTask });
+    } catch (error) {
+        console.error("Error deleting task:", error);
+        res.status(500).json({ message: "Internal server error" });
+    }
+});
+
+
   app.get("/tasks/download/:filename", (req, res) => {
     const filePath = path.join(__dirname, "public", "uploads", req.params.filename);
     if (fs.existsSync(filePath)) {

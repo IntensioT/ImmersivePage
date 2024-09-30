@@ -8,13 +8,14 @@ const app = express();
 
 const corsOptions = {
   exposedHeaders: 'Authorization, Refresh-Token',
-  allowedHeaders: ['Authorization', 'Refresh-Token','Content-Type', 'Access-Control-Allow-Headers', 'Content-Type'],
+  allowedHeaders: ['Authorization', 'Refresh-Token', 'Access-Control-Allow-Headers', 'Content-Type', 'Access-Control-Allow-Credentials'],
   methods: 'GET,POST,PUT,DELETE,OPTIONS',
   origin: 'http://127.0.0.1:5052',
   credentials: true
 };
 
 app.use(cors(corsOptions));
+// app.options('*', cors(corsOptions));
 
 app.use(cookieParser());
 

@@ -1,4 +1,4 @@
-const cacheName = "DefaultCompany-CreativeCore_Prototypes-0.1";
+const cacheName = "Intensio_Production-Immersive_Page-0.2";
 const contentToCache = [
     "Build/public.loader.js",
     "Build/public.framework.js.gz",
