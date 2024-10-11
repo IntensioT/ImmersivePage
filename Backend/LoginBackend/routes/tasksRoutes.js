@@ -23,6 +23,23 @@ const storage = multer.diskStorage({
   },
 });
 
+// Отправляем обновление задач всем подключенным клиентам
+const broadcastTasksUpdate = async () => {
+  try {
+    const tasks = await Task.find(); // Получаем задачи из базы данных
+    const tasksUpdateMessage = JSON.stringify({ type: "TASKS_UPDATE", tasks });
+
+    // Отправляем обновление всем подключенным клиентам
+    clients.forEach((client) => {
+      if (client.readyState === client.OPEN) { // Используем client.OPEN вместо WebSocket.OPEN
+        client.send(tasksUpdateMessage); // Отправляем JSON-сообщение с задачами
+      }
+    });
+  } catch (error) {
+    console.error("Error fetching tasks:", error);
+  }
+};
+
 module.exports = (app) => {
   ////////////////////////////////////////////////////
 
@@ -48,6 +65,9 @@ module.exports = (app) => {
 
       const newTask = new Task({ title, status, dueDate, file, filePath });
       await newTask.save();
+
+      broadcastTasksUpdate();
+
       res
         .status(201)
         .json({ message: "Task created successfully", task: newTask });
@@ -97,6 +117,9 @@ module.exports = (app) => {
       if (!updatedTask) {
         return res.status(404).json({ message: "Task not found" });
       }
+
+      broadcastTasksUpdate();
+
       res
         .status(200)
         .json({ message: "Task updated successfully", task: updatedTask });
@@ -123,6 +146,9 @@ module.exports = (app) => {
         if (!deletedTask) {
             return res.status(404).json({ message: "Task not found" });
         }
+
+        broadcastTasksUpdate();
+
         res.status(200).json({ message: "Task deleted successfully", task: deletedTask });
     } catch (error) {
         console.error("Error deleting task:", error);
