@@ -7,8 +7,10 @@ const cookieParser = require("cookie-parser");
 const http = require("http");
 const { WebSocketServer } = require("ws");
 
-const app = express();
+const jwt = require('jsonwebtoken');
 
+
+const app = express();
 
 // Create WebSocket server
 const wss = new WebSocketServer({ noServer: true });
@@ -28,7 +30,6 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
-// app.options('*', cors(corsOptions));
 
 app.use(cookieParser());
 
@@ -50,10 +51,9 @@ require("./routes/tasksRoutes.js")(app);
 
 
 const Task = mongoose.model("tasks");
-// Храним всех подключенных клиентов
+// all clients
 const clients = new Set();
 
-// Отправляем обновление задач всем подключенным клиентам
 const broadcastTasksUpdate = async () => {
   try {
     const tasks = await Task.find(); // Получаем задачи из базы данных
@@ -70,15 +70,13 @@ const broadcastTasksUpdate = async () => {
   }
 };
 
-// Обработка нового подключения WebSocket
+// new websocket connection
 wss.on("connection", (ws) => {
   console.log("New WebSocket client connected");
   clients.add(ws);
 
-  // Отправляем текущее состояние задач при подключении
   broadcastTasksUpdate();
 
-  // Обработка закрытия соединения
   ws.on("close", () => {
     console.log("WebSocket client disconnected");
     clients.delete(ws);
@@ -90,16 +88,44 @@ wss.on("connection", (ws) => {
   });
 });
 
+
+// server.on('upgrade', (request, socket, head) => {
+//   wss.handleUpgrade(request, socket, head, (ws) => {
+//     wss.emit('connection', ws, request);
+//   });
+// });
+
 const server = http.createServer(app);
 
-// Обрабатываем апгрейд на WebSocket
+
 server.on('upgrade', (request, socket, head) => {
-  wss.handleUpgrade(request, socket, head, (ws) => {
-    wss.emit('connection', ws, request);
+  const url = new URL(request.url, `http://${"127.0.0.1:5052"}`);
+  const token = url.searchParams.get('token');
+
+  if (!token) {
+    socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n');
+    socket.destroy();
+    return;
+  }
+
+  jwt.verify(token, keys.jwtSecret, (err, decoded) => {
+    if (err) {
+      console.log("token is wrong");
+      console.log(token);
+      socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n');
+      socket.destroy();
+      return;
+    }
+    
+    // If the token is valid, handle the upgrade
+    wss.handleUpgrade(request, socket, head, (ws) => {  
+      console.log("token is right");
+      wss.emit('connection', ws, request);
+    });
   });
 });
 
-// Запуск HTTP/WebSocket сервера
+
 server.listen(keys.port, () => {
   console.log(`Server running at http://127.0.0.1:${keys.port}/`);
 });

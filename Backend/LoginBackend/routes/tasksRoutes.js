@@ -41,9 +41,6 @@ const broadcastTasksUpdate = async () => {
 };
 
 module.exports = (app) => {
-  ////////////////////////////////////////////////////
-
-  //////////////////////////////////////////////////
 
   //Routes
   const upload = multer({ storage: storage });
