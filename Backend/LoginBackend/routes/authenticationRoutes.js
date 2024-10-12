@@ -5,6 +5,7 @@ const argon2 = require("argon2");
 const jwt = require("jsonwebtoken");
 const keys = require("../config/keys");
 
+
 const passwordRegEx = new RegExp("(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.{5,})");
 
 module.exports = (app) => {
@@ -24,6 +25,7 @@ module.exports = (app) => {
 
   //Routes
   app.post("/account/login", async (req, res) => {
+    
     const { reqUsername, reqPassword } = req.body;
 
     if (
@@ -52,7 +54,7 @@ module.exports = (app) => {
         const token = jwt.sign(
           { username: userAccount.username, adminFlag: userAccount.adminFlag },
           keys.jwtSecret,
-          { expiresIn: 60 * 3  }
+          { expiresIn: 30  }
         );
         const refreshToken = jwt.sign(
           { username: userAccount.username },
