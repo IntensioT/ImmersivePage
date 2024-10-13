@@ -92,58 +92,6 @@ wss.on("connection", (ws) => {
       const parsedMessage = JSON.parse(messageStr); // Parse the string as JSON
 
       switch (parsedMessage.type) {
-        case "REFRESH_TOKEN": {
-          const { refreshToken } = parsedMessage;
-          console.log("Server trying to refresh: " + refreshToken);
-
-          if (!refreshToken) {
-            ws.send(
-              JSON.stringify({
-                type: "ERROR",
-                message: "Unauthorized: Refresh token required",
-              })
-            );
-            return;
-          }
-
-          try {
-            const decoded = jwt.verify(refreshToken, keys.jwtRefreshSecret);
-            const userAccount = await Account.findOne({
-              username: decoded.username,
-            });
-            console.log("Server got Username:" + userAccount);
-
-            if (!userAccount || userAccount.refreshToken !== refreshToken) {
-              ws.send(
-                JSON.stringify({
-                  type: "ERROR",
-                  message: "Unauthorized: Invalid refresh token",
-                })
-              );
-              return;
-            }
-
-            const newToken = jwt.sign(
-              {
-                username: userAccount.username,
-                adminFlag: userAccount.adminFlag,
-              },
-              keys.jwtSecret,
-              { expiresIn: 60 * 3 } // 3 minutes
-            );
-
-            console.log("Token refreshed: " + newToken);
-            ws.send(JSON.stringify({ type: "NEW_TOKEN", token: newToken }));
-          } catch (err) {
-            ws.send(
-              JSON.stringify({
-                type: "ERROR",
-                message: "Unauthorized: Invalid refresh token",
-              })
-            );
-          }
-          break;
-        }
         case "ADD_TASK":
           await addTask(parsedMessage.data);
           break;
@@ -164,6 +112,9 @@ wss.on("connection", (ws) => {
       }
     } catch (error) {
       console.error("Error parsing message:", error);
+      ws.send(
+        JSON.stringify({ type: "ERROR", message: "Error processing request" })
+      );
     }
   });
 });
@@ -210,65 +161,50 @@ const deleteTask = async (data) => {
 
 const filterTasks = async (data, ws) => {
   try {
-    const { status } = data;
+    const { status, overdue } = data;
     let filter = {};
-    if (status) {
+    if (status && status !== "Status:") {
       filter.status = status;
     }
+
     const tasks = await Task.find(filter).sort({ dueDate: 1 });
     ws.send(JSON.stringify({ type: "FILTERED_TASKS", tasks }));
   } catch (error) {
     console.error("Error filtering tasks:", error);
+    ws.send(
+      JSON.stringify({ type: "ERROR", message: "Error filtering tasks" })
+    );
   }
 };
 
 //////////////////////////////////////////////////////////////////
-
 const server = http.createServer(app);
 
 server.on("upgrade", (request, socket, head) => {
-  const url = new URL(request.url, `http://${"127.0.0.1:5052"}`);
+  const url = new URL(request.url, `http://${request.headers.host}`);
   const token = url.searchParams.get("token");
 
   if (!token) {
     console.log("No token provided in WebSocket connection");
-    socket.write("HTTP/1.1 401 Unauthorized\r\n\r\n");
     socket.destroy();
     return;
   }
 
-  console.log("Received token:", token);
-
-  wss.handleUpgrade(request, socket, head, (ws) => {
-    jwt.verify(token, keys.jwtSecret, (err, decoded) => {
-      if (err) {
-        if (err.name === "TokenExpiredError") {
-          console.log("Token expired:", token);
-          ws.send(JSON.stringify({ type: "TOKEN_EXPIRED" }));
-
-          ws.on("message", (newToken) => {
-            console.log("Received new token:", newToken);
-            jwt.verify(newToken, keys.jwtSecret, (err, decoded) => {
-              if (err) {
-                console.log("Invalid new token:", newToken);
-                ws.close(4001, "Invalid token");
-              } else {
-                console.log("New token is valid:", decoded);
-                wss.emit("connection", ws, request); // Подключение с новым токеном
-              }
-            });
-          });
-        } else {
-          console.log("Invalid token:", token);
-          ws.close(4001, "Invalid token");
-        }
-        return;
+  jwt.verify(token, keys.jwtSecret, (err, decoded) => {
+    if (err) {
+      if (err.name === "TokenExpiredError") {
+        console.log("Token expired:", token);
+      } else {
+        console.log("Invalid token:", token);
       }
+      socket.destroy();
+      return;
+    }
 
-      console.log("Token is valid:", decoded);
+    console.log("Token is valid:", decoded);
 
-      console.log("Token is valid:", decoded);
-      wss.emit("connection", ws, request); // Подключение с валидным токеном
+    wss.handleUpgrade(request, socket, head, (ws) => {
+      wss.emit("connection", ws, request, decoded); // decoded - информация о пользователе
     });
   });
 });
