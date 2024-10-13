@@ -57,6 +57,7 @@ const broadcastTasksUpdate = async () => {
   try {
     const tasks = await Task.find(); // Получаем задачи из базы данных
     const tasksUpdateMessage = JSON.stringify({ type: "TASKS_UPDATE", tasks });
+    console.log("Sending message to clients: ", tasksUpdateMessage);
 
     // Отправляем обновление всем подключенным клиентам
     clients.forEach((client) => {

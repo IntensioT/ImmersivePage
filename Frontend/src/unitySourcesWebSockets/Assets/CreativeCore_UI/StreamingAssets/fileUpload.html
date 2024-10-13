@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>File Upload</title>
+</head>
+<body>
+    <input type="file" id="fileInput" style="display:none;" />
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            function uploadFile() {
+                document.getElementById('fileInput').click();
+            }
+
+            document.getElementById('fileInput').addEventListener('change', function(event) {
+                var file = event.target.files[0];
+                if (file) {
+                    var reader = new FileReader();
+                    reader.onload = function(e) {
+                        var fileData = new Uint8Array(e.target.result);
+                        window.unityInstance.SendMessage('FileLoaderObject', 'OnFileLoaded', fileData);
+                    };
+                    reader.readAsArrayBuffer(file);
+                }
+            });
+
+            // Пример вызова функции uploadFile
+            uploadFile();
+        });
+    </script>
+</body>
+</html>

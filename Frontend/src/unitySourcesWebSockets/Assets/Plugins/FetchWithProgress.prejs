@@ -1,0 +1,11 @@
+(function() {
+    var originalFetch = window.fetch;
+
+    window.fetch = function(input, init) {
+        if (init && init.credentials === undefined) {
+            init.credentials = "include";
+        }
+
+        return originalFetch(input, init);
+    };
+})();
