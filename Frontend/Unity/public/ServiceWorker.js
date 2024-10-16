@@ -1,9 +1,9 @@
 const cacheName = "Intensio_Production-Immersive_Page-0.2";
 const contentToCache = [
     "Build/public.loader.js",
-    "Build/public.framework.js.gz",
-    "Build/public.data.gz",
-    "Build/public.wasm.gz",
+    "Build/public.framework.js",
+    "Build/public.data",
+    "Build/public.wasm",
     "TemplateData/style.css"
 
 ];

@@ -23,3 +23,22 @@ const authMiddleware = (req, res, next) => {
 };
 
 module.exports = authMiddleware;
+
+const authMiddlewareGraphQL = (context) => {
+  console.log("client request: " + context.headers.authorization);
+  const token = context.headers.authorization;
+
+  if (!token) {
+    throw new Error('Unauthorized: Authentication required');
+  }
+
+  try {
+    const tokenValue = token.startsWith('Bearer ') ? token.slice(7, token.length) : token;
+    const decoded = jwt.verify(tokenValue, keys.jwtSecret);
+    return decoded; // Возвращаем данные пользователя, если токен валидный
+  } catch (err) {
+    throw new Error('Unauthorized: Invalid token');
+  }
+};
+
+module.exports = authMiddlewareGraphQL;
