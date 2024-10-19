@@ -40,53 +40,71 @@ const TaskType = new GraphQLObjectType({
   }),
 });
 
-// // Root Query
-// const RootQuery = new GraphQLObjectType({
-//   name: "RootQueryType",
-//   fields: {
-//     tasks: {
-//       type: new GraphQLList(TaskType),
-//       resolve(parent, args) {
-//         return Task.find();
-//       },
-//     },
-//     task: {
-//       type: TaskType,
-//       args: { id: { type: GraphQLID } },
-//       resolve(parent, args) {
-//         return Task.findById(args.id);
-//       },
-//     },
-//   },
-// });
-
 // Root Query
+// const RootQuery = new GraphQLObjectType({
+//     name: "RootQueryType",
+//     fields: {
+//       tasks: {
+//         type: new GraphQLList(TaskType),
+//         resolve(parent, args, context) {
+//           const user = authMiddlewareGraphQL(context); // Проверяем токен
+//           if (!user) {
+//             throw new Error("Unauthorized");
+//           }
+//           return Task.find(); // Возвращаем задачи только для авторизованных пользователей
+//         }
+//       },
+//       task: {
+//         type: TaskType,
+//         args: { id: { type: GraphQLID } },
+//         resolve(parent, args, context) {
+//           const user = authMiddlewareGraphQL(context); // Проверяем токен
+//           if (!user) {
+//             throw new Error("Unauthorized");
+//           }
+//           return Task.findById(args.id); // Возвращаем задачу только для авторизованных пользователей
+//         }
+//       }
+//     }
+//   });
 const RootQuery = new GraphQLObjectType({
-    name: "RootQueryType",
-    fields: {
-      tasks: {
-        type: new GraphQLList(TaskType),
-        resolve(parent, args, context) {
-          const user = authMiddlewareGraphQL(context); // Проверяем токен
-          if (!user) {
-            throw new Error("Unauthorized");
-          }
-          return Task.find(); // Возвращаем задачи только для авторизованных пользователей
-        }
+  name: "RootQueryType",
+  fields: {
+    tasks: {
+      type: new GraphQLList(TaskType),
+      args: {
+        status: { type: GraphQLString }, // Добавляем фильтр по статусу
       },
-      task: {
-        type: TaskType,
-        args: { id: { type: GraphQLID } },
-        resolve(parent, args, context) {
-          const user = authMiddlewareGraphQL(context); // Проверяем токен
-          if (!user) {
-            throw new Error("Unauthorized");
-          }
-          return Task.findById(args.id); // Возвращаем задачу только для авторизованных пользователей
+      resolve(parent, args, context) {
+        const user = authMiddlewareGraphQL(context); // Проверяем токен
+        if (!user) {
+          throw new Error("Unauthorized");
         }
+
+        // Создаем объект фильтра
+        const filter = {};
+        if (args.status) {
+          filter.status = args.status;
+        }
+
+        // Возвращаем задачи с применением фильтра
+        return Task.find(filter);
+      }
+    },
+    task: {
+      type: TaskType,
+      args: { id: { type: GraphQLID } },
+      resolve(parent, args, context) {
+        const user = authMiddlewareGraphQL(context); // Проверяем токен
+        if (!user) {
+          throw new Error("Unauthorized");
+        }
+        return Task.findById(args.id); // Возвращаем задачу по ID
       }
     }
-  });
+  }
+});
+
 
 // Mutations
 const Mutation = new GraphQLObjectType({
